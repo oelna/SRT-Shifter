@@ -17,33 +17,33 @@
 		}
 
 		#container {
-			width: 70%;
-			margin: 5em auto;
-			padding: 1em;
+			width: 70vw;
+			margin: 5vh auto;
+			padding: 0.5em 1em;
 			background: #fff;
 		}
 
 		#container textarea {
 			font-family: Consolas, 'Andale Mono', monospace;
 			display: block;
-			min-height: 14em;
+			height: 38vh;
 			min-width: 20em;
 			width: 100%;
 			padding: 0.5em;
-			margin-bottom: 1em;
+			margin: 0.5em 0;
 		}
 	</style>
 </head>
 
 <body>
 	<form id="container">
-		<textarea id="input"></textarea>
+		<textarea id="input" placeholder="Paste your .srt file content here"></textarea>
 
 		<label for="offset">Offset timestamps by </label>
 		<input placeholder="-00:01:30,000" value="-00:01:30,000" id="offset" />
 		<input type="submit" value="Shift" /><br />
 
-		<textarea id="output"></textarea>
+		<textarea id="output" readonly="readonly"></textarea>
 	</form>
 
 	<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
