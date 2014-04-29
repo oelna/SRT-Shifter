@@ -10,18 +10,139 @@
 		* {
 			box-sizing: border-box;
 		}
+
+		html {
+			font: 100%/1.5 Helvetica, Arial, sans-serif;
+			background: #eee;
+		}
+
+		#container {
+			width: 70%;
+			margin: 5em auto;
+			padding: 1em;
+			background: #fff;
+		}
+
+		#container textarea {
+			font-family: Consolas, 'Andale Mono', monospace;
+			display: block;
+			min-height: 14em;
+			min-width: 20em;
+			width: 100%;
+			padding: 0.5em;
+			margin-bottom: 1em;
+		}
 	</style>
 </head>
 
 <body>
-	<div id="container">
+	<form id="container">
+		<textarea id="input"></textarea>
 
-	</div>
+		<label for="offset">Offset timestamps by </label>
+		<input placeholder="-00:01:30,000" value="-00:01:30,000" id="offset" />
+		<input type="submit" value="Shift" /><br />
+
+		<textarea id="output"></textarea>
+	</form>
 
 	<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 	<script>
 		jQuery(document).ready(function($) {
 			console.log('init');
+
+			var day = new Date(2010, 1, 1, 0, 0, 0); //just a random day
+
+			function pad(n, width, z) {
+				z = z || '0';
+				n = n + '';
+				return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+			}
+
+			function get_offset(str) {
+				var offset = str.match(/([-+])?(\d+):(\d\d):(\d\d)[,:]?(\d*){0,3}/i);
+				if(!offset) return 0; //this is actually an error, not really zero
+
+				var offset_seconds = 0;
+				if(offset[1] == undefined) offset[1] = '+';
+				if(offset[5] !== undefined) offset_seconds += parseInt(offset[5]); //add milliseconds
+				offset_seconds += parseInt(offset[4])*1000; //add seconds
+				offset_seconds += parseInt(offset[3])*60*1000; //add minutes
+				offset_seconds += parseInt(offset[2])*60*60*1000; //add hours
+
+				if(offset[1].trim() == '-') {
+					return (-1*offset_seconds);
+				} else {
+					return offset_seconds;
+				}
+			}
+
+			function make_offset(date) {
+
+				return date.getHours()+':'+pad(date.getMinutes(), 2)+':'+pad(date.getSeconds(), 2)+','+pad(date.getMilliseconds(), 3);
+				//return '0:00:00,000';
+			}
+
+			function calculate_index(str, offset) {
+				var time = str.match(/(\d+):(\d\d):(\d\d)[,:]?(\d*){0,3}/i);
+				if(!time) {
+					alert('NaN');
+				} else {
+					var timeindex = day;
+					timeindex.setHours(time[1]);
+					timeindex.setMinutes(time[2]);
+					timeindex.setSeconds(time[3]);
+					if(time[4] !== undefined) timeindex.setMilliseconds(time[4]);
+
+					return {
+						'old': new Date(timeindex),
+						'new': new Date(timeindex.getTime()+offset)
+					};
+				}
+			}
+
+			$('#container').submit(function(e) {
+				e.preventDefault();
+
+
+				var output = lines = [];
+				var output_string = '';
+				var newline = '\n';
+				var input = $('#input').val();
+				var offset = get_offset($('#offset').val());
+				var segments = input.replace(/\r\n/g, '\n').split('\n\n');
+
+				$(segments).each(function(i, e) {
+					lines = e.split('\n');
+
+
+					var item = {};
+					item.id = parseInt(lines.shift());
+					item.timeindex = lines.shift();
+					item.text = lines;
+
+					var timeindices = item.timeindex.split('-->');
+
+					//calculate original and new index times
+					item.starttime = calculate_index(timeindices[0].trim(), offset);
+					item.endtime = calculate_index(timeindices[1], offset);
+
+
+					output.push(item); //add to our output
+				});
+
+				$(output).each(function(i, e) {
+					output_string += e.id+newline; //id
+					output_string += make_offset(e.starttime.new)+' --> '+make_offset(e.endtime.new)+newline; //the new time indices
+					for(i in e.text) {
+						output_string += e.text[i]+newline; //each line of text
+					}
+					output_string += newline; //a newline as separator
+				});
+
+				//push this to the output textarea
+				$('#output').val(output_string);
+			});
 		});
 	</script>
 </body>
