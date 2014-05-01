@@ -32,6 +32,15 @@
 			padding: 0.5em;
 			margin: 0.5em 0;
 		}
+
+		#container textarea.drag {
+			background-color: #007aff;
+			color: #fff;
+		}
+
+		#container textarea.drag::-webkit-input-placeholder { color: #fff; }
+		#container textarea.drag::-moz-placeholder { color: #fff; }
+		#container textarea.drag::-ms-input-placeholder { color: #fff; }
 	</style>
 </head>
 
@@ -48,6 +57,12 @@
 
 	<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 	<script>
+		//dummy console
+		if(typeof console === 'undefined') {
+			console = {};
+			console.log = function() { return; }
+		}
+
 		jQuery(document).ready(function($) {
 			console.log('init');
 
@@ -101,6 +116,45 @@
 				}
 			}
 
+
+			//a quick test whether the browser supports reading files and drag/drop
+			if(!!window.FileReader && 'draggable' in document.createElement('div')) {
+				console.log('init with file input via drag and drop');
+
+				$('#input').on('dragover dragenter', function(e) {
+					e.stopPropagation();
+					e.preventDefault();
+
+					$(this).addClass('drag').attr('placeholder', 'Drag your .srt file here');
+				}).on('drop', function(e) {
+
+					if(e.originalEvent.dataTransfer) {
+						if(e.originalEvent.dataTransfer.files.length) {
+							e.preventDefault();
+							e.stopPropagation();
+
+							var files = e.originalEvent.dataTransfer.files;
+							var reader = new FileReader();
+
+							reader.onload = function(e) {
+								$('#input').val(e.target.result);
+							};
+							reader.onerror = function(e) {
+								console.log('An error occurred during file input: '+e.target.error.code);
+							};
+
+							reader.readAsText(files[0]);
+						}
+					}
+
+					$(this).removeClass('drag').attr('placeholder', 'Paste your .srt file content here');
+				}).on('dragleave', function(e) {
+					$(this).removeClass('drag').attr('placeholder', 'Paste your .srt file content here');
+				});
+			}
+
+
+			//on form submit
 			$('#container').submit(function(e) {
 				e.preventDefault();
 
@@ -118,6 +172,7 @@
 
 					var item = {};
 					item.id = parseInt(lines.shift());
+					if(isNaN(item.id)) return; //don't process empty items
 					item.timeindex = lines.shift();
 					item.text = lines;
 
@@ -132,7 +187,8 @@
 				});
 
 				$(output).each(function(i, e) {
-					output_string += e.id+newline; //id
+					//output_string += e.id+newline; //this outputs the actual id instead, but the next line makes manual editing possible
+					output_string += i+1+newline;
 					output_string += make_offset(e.starttime.new)+' --> '+make_offset(e.endtime.new)+newline; //the new time indices
 					for(i in e.text) {
 						output_string += e.text[i]+newline; //each line of text
