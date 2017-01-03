@@ -186,6 +186,12 @@
 					output.push(item); //add to our output
 				});
 
+				//sort the output by starttime, in case we're merging two subtitle files
+				//credit: http://stackoverflow.com/a/1129270/3625228
+				output = output.sort(function(a,b) {
+					return (a.starttime.new > b.starttime.new) ? 1 : ((b.starttime.new > a.starttime.new) ? -1 : 0);
+				});
+
 				$(output).each(function(i, e) {
 					//output_string += e.id+newline; //this outputs the actual id instead, but the next line makes manual editing possible
 					output_string += i+1+newline;
