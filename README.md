@@ -16,6 +16,9 @@ The offset can be positive or negative, depending on whether the subtitles or th
 - Select and copy the newly created offset subtitle text from the bottom field into a new .srt file and either mux them into your video file or have your player like VLC open them in addition to the movie you want to play.
 - There is no step 3.
 
+## Merging SRT files
+
+In order to merge multiple sources of subtitle indices, simply paste them all into the input field after one another. The script will first shift each index by the amount indicated and then order the resulting array by index start time. That way, out of order indices are merged into one continuous string for output. Easy! (Make sure all input is off by the same amount though, or preferably, zero. If not, make several runs and correct the offset for each input file first, then merge them together.)
 
 ## Support my work
 
