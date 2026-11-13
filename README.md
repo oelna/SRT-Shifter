@@ -1,24 +1,48 @@
 # SRT Shifter
 
-## What is this?
+## What is it?
 
-This is a small Javascript tool to help you fix out-of-sync .srt-format subtitles by specifying a time offset.
+A small JavaScript tool to help you fix out-of-sync `.srt` subtitles by specifying a time offset.
 
-The offset can be positive or negative, depending on whether the subtitles or the movies are too early.
+> **⚠ Due to floating point inaccuracy, some lines may end up nudged forwards/backwards by a few milliseconds!**
+
+> **⚠ If you specify a sufficiently large negative offset (or, although unlikely, the original file contains negative timecodes), some lines may be removed!**
 
 ## Instructions
 
-- Simply open index.html in your browser and copy&paste the content of a valid .srt subtitle file (you can open them in a text editor) into the input field on the page.
-- Alternatively drag a .srt file into the input textfield (if your browser supports it)
-- Optionally edit out lines you do not want, reorder or change text, etc.
-- Specify a time offset, preferrably in this format: +00:01:20,100 (hours:minutes:seconds,milliseconds)
-- Convert
-- Select and copy the newly created offset subtitle text from the bottom field into a new .srt file and either mux them into your video file or have your player like VLC open them in addition to the movie you want to play.
-- There is no step 3.
+1. Open `index.html` in your browser
+1. Into the first text field, either:
+    - copy&paste the content of a valid `.srt` file (you can open it in a text editor)
+    - drag&drop an `.srt` file (if your browser supports it)
+1. Optionally, edit the first field's content (preferably, according to [the SubRip format](https://en.wikipedia.org/wiki/SubRip#Format))
+1. In the second field, specify a time offset (see **Offsets** below)
+1. Press the button
+1. Select and copy the newly created offset subtitle text from the third field into a new `.srt` file and either mux them into your video file or have your player like VLC open them in addition to the movie you want to play.
+
+## Offsets
+
+The format `±hours:minutes:seconds,milliseconds` only allows the `0123456789:,-+` character set.
+
+### Valid examples
+- `0,3` yields **positive** `300`milliseconds
+- `3:0,678913` yields **positive** `3`minutes`0`seconds`678`milliseconds
+- `-5834` yields **negative** `1`hour`37`minutes`14`seconds
+- `449941,81` yields **positive** `124`hours`59`minutes`1`second`810`milliseconds
+- `+000000:0:4,00` yields **positive** `4`seconds
+
+### Invalid examples
+- `3:01.4` dot (`.`) not allowed
+- `76:867;5,87655` semi-colon (`;`) not allowed
+- `—0,578` the first character is an em dash (`—`), not a hyphen (`-`)
+- `+01:chair,8` what's the chair doing here?
+- `+ 4:2:7` there's a space after the `+`
+- `,841` lacks seconds
+- `:325` lacks minutes
+- `:475:230, ` lacks hours and milliseconds
 
 ## Merging SRT files
 
-In order to merge multiple sources of subtitle indices, simply paste them all into the input field after one another. The script will first shift each index by the amount indicated and then order the resulting array by index start time. That way, out of order indices are merged into one continuous string for output. Easy! (Make sure all input is off by the same amount though, or preferably, zero. If not, make several runs and correct the offset for each input file first, then merge them together.)
+In order to merge multiple sources of subtitle indices, simply paste them all into the input field after one another. The script will first shift each index by the amount indicated and then order the resulting array by index start time, while discarding lines that end up with negative start or end times. That way, out of order indices are merged into one continuous string for output. Easy! (Make sure all the input is off by the same amount though, or preferably, zero. If not, make several runs and correct the offset for each input file first, then merge them together.)
 
 ## Support my work
 

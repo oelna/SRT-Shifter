@@ -1,0 +1,34 @@
+* {
+    box-sizing: border-box;
+}
+
+html {
+    font: 100%/1.5 Helvetica, Arial, sans-serif;
+    background: #eee;
+}
+
+#container {
+    width: 70vw;
+    margin: 5vh auto;
+    padding: 0.5em 1em;
+    background: #fff;
+}
+
+#container textarea {
+    font-family: Consolas, 'Andale Mono', monospace;
+    display: block;
+    height: 38vh;
+    min-width: 20em;
+    width: 100%;
+    padding: 0.5em;
+    margin: 0.5em 0;
+}
+
+#container textarea.drag {
+    background-color: #007aff;
+    color: #fff;
+}
+
+#container textarea.drag::-webkit-input-placeholder { color: #fff; }
+#container textarea.drag::-moz-placeholder { color: #fff; }
+#container textarea.drag::-ms-input-placeholder { color: #fff; }
